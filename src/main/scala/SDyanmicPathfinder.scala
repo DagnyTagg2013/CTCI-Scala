@@ -33,7 +33,7 @@
 import scala.collection.immutable.Map
 
 // list spots that are BLOCKED
-object  DynamicPathFinder extends App {
+object  SDyanmicPathfinder extends App {
 
   // ATTN:  super-easy auto-class creation!
   case class Point(x: Integer, y: Integer)
@@ -92,12 +92,12 @@ object  DynamicPathFinder extends App {
       // println isValidPath
     }
 
-    // PROBLEM1:  reference leftPartialPath from above!
+    // PROBLEM1:  want to reference leftPartialPath from above, but it's out of scope!
     // PROBLEM2:  mutate isValidPath!
 
     // SECOND:  Try UP
-    if (!isValidPath && y >= 1 && isFreeSpot( Point(x, y - 1) ) )
-      val (isValidPathUp, upPartialPath) = buildPath(x, y - 1, leftPartialPath)
+    //if (!isValidPath && y >= 1 && isFreeSpot( Point(x, y - 1) ) )
+      //val (isValidPathUp, upPartialPath) = buildPath(x, y - 1, leftPartialPath)
 
     // BACKOUT BAD MOVE!  Wrong way!  Stop going this way!
     if (!isValidPath)
@@ -109,13 +109,15 @@ object  DynamicPathFinder extends App {
 
   // *********** MAIN EXECUTION *****************
   // ATTN:  Scala Access Levels!
-  val startPath, foundPath: List[Point] = List()
+  val startPath: List[Point] = List()
+  val foundPath: List[Point] = List()
   val isValidPath: Boolean = false
 
   val blockedPath: List[Point] = List(Point(1,1), Point(2,2))
   val gridDimension: Integer = 3
   // ATTN:  unpacking tuples via tuple declaration with interior values!
-  val (foundPath, isValidPath) = buildPath(gridDimension, gridDimension, startPath)
+  // TODO:  need to create NEW Returned values!
+  val (foundPathRtn, isValidPathRtn) = buildPath(gridDimension, gridDimension, startPath)
 
   // ATTN:  Printing results from List here:
   println("RESULTING PATH FOUND!")
