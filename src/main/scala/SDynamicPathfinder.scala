@@ -8,7 +8,13 @@
   * APPROACH:   Start at DESTINATION; then move BACKWARDS (first LEFT, then UP)
   *             Build Path as you go, and recursively!
   *
+  * TODO:  make this work already; but need to use MUTABLE collections to ACCUMULATE STATE!
+  *
   */
+
+// NOTE:  REVERSE type definition
+//
+
  /*
   *
   * - http://stackoverflow.com/questions/9535821/scala-mutable-var-method-parameter-reference
@@ -33,20 +39,21 @@
 import scala.collection.immutable.Map
 
 // list spots that are BLOCKED
-object  SDyanmicPathfinder extends App {
+object  SDynamicPathfinder extends App {
 
   // ATTN:  super-easy auto-class creation!
   case class Point(x: Integer, y: Integer)
 
   // TODO:  make this configurable INPUT value?
   val blockedSpots: Map[Point, Boolean] = Map( Point(1, 1) -> true,
-                                          Point(2, 2) -> true )
+                                               Point(2, 2) -> true )
 
   // ATTN:  Function declaration; and Map usage!
   // http://stackoverflow.com/questions/10567744/how-to-check-whether-key-or-value-exist-in-map
   def isFreeSpot(testPoint:Point):Boolean = {
 
     // ATTN:  Usage of If-Else with return value, NO return statement!
+    // ATTN:  Test for key in set!
     if (blockedSpots.keySet.exists(_ == testPoint))
       false
     else

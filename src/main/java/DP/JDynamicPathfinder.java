@@ -10,9 +10,13 @@ import java.util.List;
  *           - navigate a grid with certain BLOCKED points!
  *           - ORIGIN at TOP LEFT; END at BOTTOM RIGHT
  *
- * ALGO:
- * - hold State-Building MEMO of PRIOR RESULTs on STACK variable, so no need to recalculate via multi-recursion calls!
- * - solve BACKWARDs from END to degenerate EXIT case at the beginning!
+ * EXTENSION:  can check VISITED/CACHED points to RETURN result immediately if invalid path;
+ *             otherwise, ADD to CACHE prior to return!
+ *
+ * APPROACH:
+ *
+ * - CHAIN Boolean RESULTS of one directional check into the INPUT for the NEXT iterative check!
+ * - RETURN Boolean validation indicator to check whether to STOP BREADTH-FIRST path recursion on current node and descendants!
  *
  * StackOverflow:  Java8 vs Scala
  * - http://kukuruku.co/hub/scala/java-8-vs-scala-the-difference-in-approaches-and-mutual-innovations
@@ -35,8 +39,8 @@ import java.util.List;
  * -  rm -rf ~/.m2/repository/org/apache
  *
  * StackOverflow:  IntelliJ Auto-Importing of Class!
+ * - ALT + ENTER on MAC!
  * - http://stackoverflow.com/questions/31211842/any-way-or-shortcut-to-auto-import-the-classes-in-intellij-like-in-eclipse
- * -
  *
  * - LIST initialization
  * - http://www.leveluplunch.com/java/examples/initialize-list/
@@ -49,13 +53,13 @@ public class JDynamicPathfinder {
 
     // TODO:  refactor to accept into ctor!
     private static int GRID_DIM = 0;  // NOTE:  0-based origin!
-
-    // TODO:  refactor to accept into ctor, an INDEPENDENT Point class!
+    // TODO:  refactor to accept into ctor, an INDEPENDENT Point class, since needs to support Containment check with Hashcode and Equals!
     // http://stackoverflow.com/questions/5600668/how-can-i-initialize-an-arraylist-with-all-zeroes-in-java
     private List<Point>  blockedPoints;
+
     public JDynamicPathfinder (int gridDimension, List<Point> blockedPoints) {
 
-        this.GRID_DIM = 3;
+        this.GRID_DIM = gridDimension;
         // TODO:  take a local COPY instead!
         this.blockedPoints = blockedPoints;
 
@@ -65,7 +69,7 @@ public class JDynamicPathfinder {
 
 
 
-    // ATTN:  use raw coordinates!
+    // ATTN:  use RAW coordinates!
     private boolean isFree (int x, int y) {
 
         // TODO:  spurious creation of NEW point!
@@ -75,12 +79,17 @@ public class JDynamicPathfinder {
         return isFree;
     }
 
+    // TODO:  BEST to START with TRUE invariant, then do TRANSITION and TEST prior to adding to VISITED LIST!
+    //        OTHERWISE, have to BACKOUT partialPath!
     // ATTN:
     // - input current x coordinate from ORIGIN 0; and y coordinate also!
-    //
+    // - uses RAW coordinates to check boundaries, but save Point composite to Path!
+    // - returns FALSE to BACKUP DEPTH-FIRST RECURSIVE stack on finding Path possibilities!
+    // TODO:  note that state is validated, then ADVANCEMENT is validated prior to recursive call!
+    //        i.e. VALIDATE at TOP of recursive function; or PRIOR to calling recursive call!
     public boolean getPath(int x, int y, List<Point> partialPath) {
 
-        // ATTN:  test if FIRST point is on BLOCK List!
+        // ATTN:  FIRST test if vien point is on BLOCK List!
         if (!isFree(x, y))
         {
             return false;  // LAST point on path is BLOCKED, so NO valid path exists!
@@ -96,16 +105,19 @@ public class JDynamicPathfinder {
 
         boolean success = false;
 
-        // ATTN: MOVE BACKWARDS by FIRST going LEFT, THEN UP
+        // ATTN: MOVE BACKWARDS by FIRST going LEFT, and VALIDATE PRIOR to recursive call!
         if ((x >= 1) && isFree(x - 1, y)) {
             success = getPath(x - 1, y, partialPath);
         }
 
+
+        // ATTN:  NOW go UP
         // ATTN:  CHAIN prior result, because want to navigate nearly an optimal DIAGONAL path!
         if (!success && (y >= 1) && isFree(x, y - 1)) {
             success = getPath(x, y - 1, partialPath);
         }
 
+        // ATTN:  BACK out element if not useful!
         if (!success) {
             partialPath.remove(p);
         }
