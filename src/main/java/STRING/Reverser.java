@@ -1,5 +1,7 @@
 package STRING;
 
+import com.sun.javaws.exceptions.InvalidArgumentException;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -54,45 +56,69 @@ public class Reverser {
       }
 
       // NOTE:  simplify with String split!
-      // NOTE:  ASSUME NO TRAILING SPACES for Sentence, or this will NOT work!
-      // NOTE:  use array to simulate Tuple returns from Python!
-      // NOTE:  END of substring is 1 index AFTER last letter in Java!
-      // NOTE:  SCAN NEXT ONE; initialize START index for FIRST WORD
-      // NOTE:  HANDLE TRAILING String!
-      public int[] findStartStopIndexNextWord(String sentence, int lastWordStart, int scanIndex) {
+      // NOTE:  ASSUME NO TRAILING SPACES for Sentence!
+      // NOTE:  can use array to simulate Tuple function arg returns from Python!
+      // NOTE:  END index is index of last letter of word
+      // NOTE:  SCAN NEXT START index of NEXT word after ' ' found!
+      public int findEndIndexCurrentWord(String sentence, int nextWordStart) {
 
+          int scanIndex = nextWordStart;  // START position of first letter of next word, moving towards END position of CURRENT word
+          int endWordIndex = -1;          // initialize END index to -1
 
-          int [] nextWordDelimits = new int[3];
-          nextWordDelimits[0] = lastWordStart;
-          nextWordDelimits[1] = -1;   // start next word, or end of current word
-          nextWordDelimits[2] = scanIndex;  // current scan index, or space between words each time
-
-          // EXIT with false code if invalid scanIndex position
-          if ((scanIndex < 0) || (scanIndex >= sentence.length() - 1)) {
-            return nextWordDelimits;
+          // EXIT AT BOL
+          if (scanIndex < 0) {
+              throw new IllegalArgumentException("nextWordStart should be > 0");
           }
 
-          while (   scanIndex < (sentence.length() - 1) ) {
+          // EXIT AT EOL
+          // ATTN > or = length boundary check!
+          if (scanIndex > sentence.length()) {
+              throw new IllegalArgumentException("nextWordStart should be <= length - 1 of sentence");
+          }
+
+          // ATTN:  returns -1 on EOL DETECTION!
+          while (   scanIndex <= (sentence.length() - 1) ) {
+              // STOPs when BLANK found, detecting TRAIILNG blank!
               if (sentence.charAt(scanIndex) == ' ') {
-                      nextWordDelimits[1] = scanIndex + 1;  // NOTE:  save one PAST BLANK position HERE!
-                    // NOTE:  Java substring END index is one PAST last char in String; which is exactly space index here!
-                      // BREAKOUT of scan once LAST delimiting index is found!
-                      // CACHE word end
+                      endWordIndex = scanIndex - 1;
                       break;
               }
-              // ATTN:  ITERATE on condition!
               scanIndex++;
           }
 
-          // ALWAYS save NEXT position to examine!
-          nextWordDelimits[2] = scanIndex;
-
-          // ATTN:  handle TRAILING case, where EXIT scan early as LAST terminating SPACE at EOL NOT found; so SET END of last word to END of sentence!
-          if ((nextWordDelimits[1] == -1) && (scanIndex == (sentence.length() - 1))) {
-              nextWordDelimits[1] = sentence.length();
+          // ATTN:  HANDLE END CASE with NO TERMINATING BLANK!
+          // NOTE:  OTHERWISE, checking for just -1 will FAIL to pickup last index of line, and RESTART on endIndex -1!
+          if (scanIndex == sentence.length()) {
+              endWordIndex = sentence.length() - 1;
           }
 
-          return nextWordDelimits;
+          // THUS ALWAYS finds end of current word if there is one!
+          return endWordIndex;
+
+      }
+
+    public String reverseWordsInSentence(String input) {
+
+        int scanIndex = 0, endIndexCurrentWord = 0;
+
+        // ATTN INITIALIZING first aggregate result; then CHAIN later!
+        String reversedString = input;
+
+        // ATTN:  handle case of advancing past EOL in OUTER loop update!
+        while (scanIndex < reversedString.length()) {
+
+            endIndexCurrentWord = findEndIndexCurrentWord(reversedString, scanIndex);
+
+            // NOTE:  CHAINING PRIOR OUTPUT TO CURRENT INPUT TO ITERATE RESULTS - IN-PLACE
+            reversedString = reverseOneWordByIndexes(reversedString, scanIndex, endIndexCurrentWord);
+            System.out.println(reversedString);
+
+            // ATTN:  ADVANCE to NEXT location, but next WHILE checks for bounds to terminate THIS outer WHILE loop,
+            scanIndex = endIndexCurrentWord + 2;
+
+        }
+
+        return reversedString;
 
       }
 
@@ -112,42 +138,54 @@ public class Reverser {
 
           // TEST 3: ENTIRE SENTENCE
           String test3Data = "The Quick Brown Fox Jumped Over the Fence";
-          String reversed3= reverser.reverseOneWord(test3Data);
+          String reversed3 = reverser.reverseOneWord(test3Data);
           System.out.println(String.format("TEST3:  Full sentence reversed is %s", reversed3));
 
-          // TEST 4: DELIMITERS for WORDS in SENTENCE SIMULATING SPLIT!
-          //         * INIT START; then get END
-          //         * HANDLE TRAILING CASE SPECIALLY
-          //         * HANDLE INIT CASE SPECIALLY to CHAIN LAST result as String START of NEXT result!
+          // TEST 4: REVERSE word by DELIMITERS
           System.out.println("***** TEST 4");
           String test4Data = "The Fox";
-          int[] nextWordDelimits = new int[3];
-          nextWordDelimits[0] = 0;  // START scan at 0
-          nextWordDelimits[1] = -1; // INIT word scan
-          nextWordDelimits[2] = 0;
-          while (nextWordDelimits[2] < (test4Data.length() - 1)) {
-
-              // NOTE:  CHAIN-PASS-IN LATEST scanIndex!
-              if (nextWordDelimits[1] == -1) {
-                  nextWordDelimits = reverser.findStartStopIndexNextWord(test4Data, nextWordDelimits[0], nextWordDelimits[2]);
-              }
-              else {
-                  nextWordDelimits = reverser.findStartStopIndexNextWord(test4Data, (nextWordDelimits[1] + 1), nextWordDelimits[2]);
-              }
-              System.out.println(String.format("FOUND word at boundaries:  (%d, %d); WORD %s", nextWordDelimits[0], nextWordDelimits[1], test4Data.substring(nextWordDelimits[0], nextWordDelimits[1])));
-
-              // ATTN:  iterate to NEXT scan point!
-              nextWordDelimits[2] = nextWordDelimits[2] + 1;
-          }
-
-          // TEST 5: REVERSE words by DELIMITERS
-          System.out.println("***** TEST 5");
-          // ATTN:  substring requires index one PAST last char; BUT reverse word requires index exactly AT the last char!
+          // ATTN:  reverse word requires index exactly AT the first and last char!
           String reversedOneWordInSentence = reverser.reverseOneWordByIndexes(test4Data, 4, 6);
           System.out.println(reversedOneWordInSentence);
 
-          // TEST 6:  REVERSE ALL WORDS AS PRIOR IN ABOVE WHILE LOOP; AFTER REVERSING ENTIRE SENTENCE!
-          // TODO:
+
+          // TEST 5: FIND DELIMITERS for WORDS in SENTENCE SIMULATING SPLIT!
+          //         * INIT START; then get END
+          //         * FUNCTION HANDLES START AND TRAILING BLANK SPECIALLY
+          //         * CHAIN LAST result as String START for NEXT word!
+          System.out.println("***** TEST 5");
+          String test5Data = "The Quick Brown Fox Jumped Over the Fence";
+          // ATTN:  track with lookback index to beginning of word,
+          //        then CHAIN to input of START index for NEXT iteration
+          int scanIndex = 0, endIndexCurrentWord = 0;
+          // ATTN INITIALIZING first aggregate result!
+          String reversedString = test5Data;
+
+          // ATTN:  handle case of advancing past EOL in OUTER loop update!
+          while (scanIndex < reversedString.length()) {
+
+              endIndexCurrentWord = reverser.findEndIndexCurrentWord(reversedString, scanIndex);
+
+              // NOTE:  CHAINING PRIOR OUTPUT TO CURRENT INPUT TO ITERATE RESULTS
+              reversedString = reverser.reverseOneWordByIndexes(reversedString, scanIndex, endIndexCurrentWord);
+              System.out.println(reversedString);
+
+              // ATTN:  ADVANCE to NEXT location, but next WHILE checks for bounds to terminate THIS outer WHILE loop,
+              scanIndex = endIndexCurrentWord + 2;
+
+          }
+
+          // TEST 6:  REVERSE ALL WORDS AS PRIOR IN ABOVE WHILE LOOP; SUCCESS IN REVERSING WORDS IN SENTENCE!
+          System.out.println("***** TEST 6");
+          String test6Data = "The Quick Brown Fox Jumped Over the Fence";
+          String reversePass1 =  reverser.reverseOneWord(test6Data);
+          System.out.println("Reverse Pass 1");
+          System.out.println(reversePass1);
+          System.out.println("Reverse Pass 2");
+          String reversePass2 = reverser.reverseWordsInSentence(reversePass1);
+          System.out.println("FINAL RESULT");
+          System.out.println(reversePass2);
+
 
       }
 }
