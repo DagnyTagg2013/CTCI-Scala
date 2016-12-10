@@ -62,7 +62,7 @@ public class SpiralPath {
         this.MAX_POINTS = gridDim * gridDim;
     }
 
-    public Point moveOneSpotInCurrentDirection(int x, int y, Direction direction, List<Point> visited) {
+    public SPoint moveOneSpotInCurrentDirection(int x, int y, Direction direction, List<SPoint> visited) {
 
         // NOW move along adjusted direction prior to rec
         switch (direction) {
@@ -86,7 +86,7 @@ public class SpiralPath {
         // ONE: if BOUNDARY REACHED, throw exception!
         // OR return NULL!
         // TWO: if VISITED REACHED, ALSO throw exception!
-        Point movedPoint = new Point(x, y);
+        SPoint movedPoint = new SPoint(x, y);
         if ((x < 0) || (x > MAX_INDEX) || (y < 0) || (y > MAX_INDEX) || visited.contains(movedPoint)) {
             throw new IndexOutOfBoundsException("Out of Grid Bounds");
             //return null;
@@ -99,7 +99,7 @@ public class SpiralPath {
         return movedPoint;
     }
 
-    Point multipleMovesOneDirection(Point currentPoint, Direction currentDirection, List<Point> visited) {
+    SPoint multipleMovesOneDirection(SPoint currentPoint, Direction currentDirection, List<SPoint> visited) {
 
         try {
             // NOTE:  ENDLESS LOOP; BROKEN only by EXCEPTION!
@@ -191,8 +191,8 @@ public class SpiralPath {
 
         // TEST CASE 4: LOOP to KEEP MOVING in NEW direction; BUT STOP when visited is FULL!
         System.out.println("***** TEST 4");
-        Point currentPoint = new Point(2, 0);
-        List<Point> visited = new ArrayList<Point>();
+        SPoint currentPoint = new SPoint(2, 0);
+        List<SPoint> visited = new ArrayList<SPoint>();
         // ATTENTION!  Need to initialize VISITED list with FIRST POINT!
         visited.add(currentPoint);
         Direction currentDirection = Direction.LEFT;

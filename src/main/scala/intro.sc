@@ -1,5 +1,9 @@
 
 
+import DP.{SPoint, SDynamicPathfinder}
+import scala.collection.immutable.Map
+import scala.collection.mutable.ListBuffer
+
 println("Hello Scala")
 // type switched, type inference, no semicolon
 var name1: String = "Ned"
@@ -54,8 +58,9 @@ val a = List(1,2)
 
 
 // SWITCHES ETC
+val color = "red"
 val hex = color match {
-  case "read' => "#f00""
+  case "red" => "#f00"
 }
 
 val b = a :+ 3
@@ -98,10 +103,9 @@ val y = {
 
 val test = "bogus"
 
-val x = test match {
+val z = test match {
   case "" => "invalid_empty"
-  case _ =>
-    "n/a"
+  case _ => "n/a"
 }
 
 // if (boolean) expression else expression
@@ -110,4 +114,3 @@ val x = test match {
 // NO ELSEIF in Scala -- nested expression
 
 // IMPLICIT TYPES
-}                                                                                                   www.
