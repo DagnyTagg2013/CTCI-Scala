@@ -55,9 +55,9 @@ public class JDynamicPathfinder {
     private static int GRID_DIM = 0;  // NOTE:  0-based origin!
     // TODO:  refactor to accept into ctor, an INDEPENDENT Point class, since needs to support Containment check with Hashcode and Equals!
     // http://stackoverflow.com/questions/5600668/how-can-i-initialize-an-arraylist-with-all-zeroes-in-java
-    private List<SPoint>  blockedPoints;
+    private List<Point>  blockedPoints;
 
-    public JDynamicPathfinder (int gridDimension, List<SPoint> blockedPoints) {
+    public JDynamicPathfinder (int gridDimension, List<Point> blockedPoints) {
 
         this.GRID_DIM = gridDimension;
         // TODO:  take a local COPY instead!
@@ -73,7 +73,7 @@ public class JDynamicPathfinder {
     private boolean isFree (int x, int y) {
 
         // TODO:  fix spurious creation of NEW point!
-        SPoint testPoint = new SPoint(x,y);
+        Point testPoint = new Point(x,y);
         boolean isFree = !blockedPoints.contains(testPoint);
 
         return isFree;
@@ -87,7 +87,7 @@ public class JDynamicPathfinder {
     // - returns FALSE to BACKUP DEPTH-FIRST RECURSIVE stack on finding Path possibilities!
     // TODO:  note that state is validated, then ADVANCEMENT is validated prior to recursive call!
     //        i.e. VALIDATE at TOP of recursive function; or PRIOR to calling recursive call!
-    public boolean getPath(int x, int y, List<SPoint> partialPath) {
+    public boolean getPath(int x, int y, List<Point> partialPath) {
 
         // ATTN:  FIRST test if point is on BLOCK List!
         if (!isFree(x, y))
@@ -95,7 +95,7 @@ public class JDynamicPathfinder {
             return false;  // LAST point on path is BLOCKED, so NO valid path exists!
         }
 
-        SPoint p = new SPoint(x, y);
+        Point p = new Point(x, y);
         partialPath.add(p);
 
         // ATTN:  boundary degenerate case!
@@ -135,13 +135,13 @@ public class JDynamicPathfinder {
         // ******* TEST 1:  BLOCKED PATH ***********
         // INITIALIZE Blocked Points
         System.out.println("TEST 1");
-        List<SPoint> blockedPoints1 = new ArrayList<SPoint>();
-        blockedPoints1.add(new SPoint(1,1));
-        blockedPoints1.add(new SPoint(2,2));
-        blockedPoints1.add(new SPoint(3,3));
+        List<Point> blockedPoints1 = new ArrayList<Point>();
+        blockedPoints1.add(new Point(1,1));
+        blockedPoints1.add(new Point(2,2));
+        blockedPoints1.add(new Point(3,3));
 
         JDynamicPathfinder aDynamicPathfinder = new JDynamicPathfinder(3, blockedPoints1);
-        List<SPoint> partialPath = new ArrayList<SPoint>();
+        List<Point> partialPath = new ArrayList<Point>();
         boolean isFoundPath = aDynamicPathfinder.getPath(JDynamicPathfinder.GRID_DIM, JDynamicPathfinder.GRID_DIM, partialPath);
         if (isFoundPath) {
             System.out.println("FOUND Path is:  ");
@@ -154,11 +154,11 @@ public class JDynamicPathfinder {
         // ****** TEST 2: VALID PATH ***************
         // INITIALIZE Blocked Points
         System.out.println("\nTEST 2");
-        List<SPoint> blockedPoints2 = new ArrayList<SPoint>();
-        blockedPoints2.add(new SPoint(2,2));
+        List<Point> blockedPoints2 = new ArrayList<Point>();
+        blockedPoints2.add(new Point(2,2));
 
         JDynamicPathfinder aDynamicPathfinder2 = new JDynamicPathfinder(3, blockedPoints2);
-        List<SPoint> partialPath2 = new ArrayList<SPoint>();
+        List<Point> partialPath2 = new ArrayList<Point>();
         boolean isFoundPath2 = aDynamicPathfinder2.getPath(JDynamicPathfinder.GRID_DIM, JDynamicPathfinder.GRID_DIM, partialPath2);
         if (isFoundPath2) {
             System.out.println("FOUND Path is:  ");
